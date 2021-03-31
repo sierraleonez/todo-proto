@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  StatusBar,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DatePicker from 'react-native-date-picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {notifikasi} from '../../src/notification';
 
 // Import Component
 import TodoItem from '../components/item';
@@ -37,11 +37,16 @@ export default function home() {
   const [taskDesc, setTaskDesc] = useState('');
   const [date, setDate] = useState(new Date());
 
+  // Test Notification
+  function buatNotif(title, message, alarm) {
+    notifikasi.configure();
+    notifikasi.createChannel('1');
+    notifikasi.scheduleNotif('1', title, message, alarm);
+  }
+
   // Add Todo Function
   const currentDate = new Date();
   function todoMaster(inp, dsc) {
-    console.log(testState);
-    console.log(counter);
     setCounter(counter + 1);
     let input = {
       task: inp,
@@ -66,6 +71,7 @@ export default function home() {
   // Clear Todo
   function deleteAllTodo() {
     setTestState([]);
+    saveTodo(testState);
   }
   // Done Todo Function
   function doneTodo(id, done) {
@@ -73,11 +79,11 @@ export default function home() {
     if (!done) {
       testState[index].done = true;
       saveTodo(testState.filter((x) => x.id !== -1));
-      console.log('done');
+      // console.log('done');
     } else {
       testState[index].done = false;
       saveTodo(testState.filter((x) => x.id !== -1));
-      console.log('undone');
+      // console.log('undone');
     }
     setTestState([...testState]);
   }
@@ -103,12 +109,12 @@ export default function home() {
     id.then((e) => {
       if (e !== 'null') {
         setCounter(parseInt(e));
-        console.log(e + 'localID');
+        // console.log(e + 'localID');
       }
-      console.log(parseInt(e));
+      // console.log(parseInt(e));
       saveID(counter);
     });
-    console.log(testState);
+    // console.log(testState);
   }, []);
   return (
     <View style={{backgroundColor: '#fff', flex: 1}}>
@@ -160,6 +166,7 @@ export default function home() {
               input == ''
                 ? alert('Task Cannot Be Empty')
                 : todoMaster(input, desc);
+              buatNotif(input, desc, date);
             }}
             style={{
               alignSelf: 'flex-end',
@@ -184,6 +191,7 @@ export default function home() {
             }}>
             <Text>Delete All</Text>
           </TouchableOpacity>
+
           {testState.length == 0 && <Text>Currently no task here</Text>}
 
           <View style={{alignItems: 'center', backgroundColor: '#fff'}}>
@@ -196,7 +204,7 @@ export default function home() {
                 detail={() => {
                   setShowModal(true);
                   setModalData(e);
-                  console.log(e);
+                  // console.log(e);
                 }}
                 key={e.id}
               />
