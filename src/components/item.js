@@ -18,7 +18,7 @@ export default function item({task, onPress, doneTodo, done, detail, id, due}) {
     <View
       key={id}
       style={{
-        width: wp('67%'),
+        width: wp('70 %'),
         height: heightPercentageToDP('8%'),
         paddingVertical: 24,
         paddingHorizontal: 8,
@@ -64,6 +64,7 @@ export default function item({task, onPress, doneTodo, done, detail, id, due}) {
             (minutes.length == 1 ? '0' + minutes : minutes)}
         </Text>
       </TouchableOpacity>
+
       <TouchableOpacity
         activeOpacity={0.2}
         onPress={onPress}

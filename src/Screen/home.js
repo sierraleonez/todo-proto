@@ -219,17 +219,21 @@ export default function home({navigation}) {
 
           <TouchableOpacity
             onPress={() => {
-              // deleteAllTodo();
-              slideUp();
+              deleteAllTodo();
             }}
             style={{
               alignSelf: 'flex-end',
               marginHorizontal: 32,
+              marginVertical: 8,
             }}>
-            <Text>Delete All</Text>
+            <Text style={{fontFamily: 'Nunito-Bold'}}>Delete All</Text>
           </TouchableOpacity>
 
-          {testState.length == 0 && <Text>Currently no task here</Text>}
+          {testState.length == 0 && (
+            <Text style={{fontFamily: 'Nunito-Regular', marginTop: 16}}>
+              Currently no task here
+            </Text>
+          )}
           <ScrollView>
             <View style={{alignItems: 'center', backgroundColor: '#fff'}}>
               {testState.map((e) => (
@@ -250,14 +254,15 @@ export default function home({navigation}) {
           </ScrollView>
         </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate('test_screen')}>
+        {/* <TouchableOpacity onPress={() => navigation.navigate('test_screen')}>
           <Text>Go to Test</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ScrollView>
       <TouchableOpacity
+        onPress={slideUp}
         style={{
           position: 'absolute',
-          zIndex: 4,
+          zIndex: 1,
           marginTop: hp('88%'),
           alignSelf: 'flex-end',
           paddingHorizontal: 16,
@@ -271,6 +276,7 @@ export default function home({navigation}) {
           borderTopRightRadius: 50,
           backgroundColor: '#fff',
           position: 'absolute',
+          zIndex: 2,
           transform: [{translateY: topY}],
         }}>
         <AddTodo
@@ -282,6 +288,7 @@ export default function home({navigation}) {
           setDate={setDate}
           todoMaster={todoMaster}
           buatNotif={buatNotif}
+          slideDown={slideDown}
         />
       </Animated.View>
 
