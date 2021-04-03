@@ -7,26 +7,32 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
+  Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DatePicker from 'react-native-date-picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {notifikasi} from '../../src/notification';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 
 // Import Component
 import TodoItem from '../components/item';
 import TopBar from '../components/topBar';
 import {saveTodo, saveID, clearID} from '../action/action';
+import AddTodo from '../components/addTodo';
 
 // Screen Dimension
 const screenWidth = Dimensions.get('window').width;
 
-export default function home() {
+export default function home({navigation}) {
   // Get item from local storage
   let todo = AsyncStorage.getItem('todo_item');
   let id = AsyncStorage.getItem('id');
 
   // State
+  const topY = useState(new Animated.Value(hp('100%')))[0];
   const [input, setInput] = useState('');
   const [counter, setCounter] = useState(0);
   const [desc, setDesc] = useState('');
@@ -36,6 +42,44 @@ export default function home() {
   const [taskName, setTaskName] = useState('');
   const [taskDesc, setTaskDesc] = useState('');
   const [date, setDate] = useState(new Date());
+  const dateNow = new Date();
+  const day = dateNow.getDay();
+
+  // Sliding Up function
+  function slideUp() {
+    Animated.spring(topY, {
+      toValue: hp('41%'),
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }
+
+  function slideDown() {
+    Animated.spring(topY, {
+      toValue: hp('100%'),
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }
+
+  // Create dayname
+  function dayString() {
+    let string;
+    day == 1
+      ? (string = 'Mon')
+      : day == 2
+      ? (string = 'Tue')
+      : day == 3
+      ? (string = 'Wed')
+      : day == 4
+      ? (string = 'Thurs')
+      : day == 5
+      ? (string = 'Fri')
+      : day == 6
+      ? (string = 'Sat')
+      : (string = 'Sun');
+    return string;
+  }
 
   // Test Notification
   function buatNotif(title, message, alarm) {
@@ -60,6 +104,7 @@ export default function home() {
     setDesc('');
     setInput('');
     saveTodo([...testState, input]);
+    slideDown();
   }
 
   // Delete Todo Function
@@ -119,71 +164,63 @@ export default function home() {
   return (
     <View style={{backgroundColor: '#fff', flex: 1}}>
       <TopBar title={`Task(${testState.length})`} />
-      <ScrollView>
-        <View style={{alignItems: 'center', marginVertical: 32, flex: 1}}>
-          <TextInput
-            value={input}
-            onChangeText={(inp) => {
-              setInput(inp);
-            }}
-            placeholder="Tell Us What You Wanna Do..."
+      <ScrollView
+        style={{
+          bottom: hp('3%'),
+          borderTopLeftRadius: 30,
+          backgroundColor: '#fff',
+        }}>
+        <View
+          style={{
+            alignItems: 'center',
+            paddingVertical: 32,
+            flex: 1,
+          }}>
+          <View
             style={{
-              borderColor: '#9f9f9f',
-              borderWidth: 1,
-              width: screenWidth - 64,
-              height: 42,
-              borderRadius: 25,
-              paddingHorizontal: 16,
-            }}
-          />
-          <TextInput
-            value={desc}
-            onChangeText={(dsc) => {
-              setDesc(dsc);
-            }}
-            placeholder="Description of your task goes here..."
-            style={{
-              marginTop: 16,
-              borderColor: '#9f9f9f',
-              borderWidth: 1,
-              width: screenWidth - 64,
-              height: 42,
-              borderRadius: 25,
-              paddingHorizontal: 16,
-            }}
-          />
-          <View>
-            <DatePicker
-              minimumDate={new Date()}
-              date={date}
-              onDateChange={(data) => {
-                setDate(data);
-              }}
-            />
-          </View>
-          <TouchableOpacity
-            onPress={() => {
-              input == ''
-                ? alert('Task Cannot Be Empty')
-                : todoMaster(input, desc);
-              buatNotif(input, desc, date);
-            }}
-            style={{
-              alignSelf: 'flex-end',
+              alignSelf: 'flex-start',
               marginHorizontal: 32,
-              marginTop: 16,
-              paddingHorizontal: 24,
-              paddingVertical: 16,
-              backgroundColor: 'red',
-              justifyContent: 'center',
-              borderRadius: 20,
-              marginBottom: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
             }}>
-            <Text style={{color: '#f5f5f5'}}>Add Todo</Text>
-          </TouchableOpacity>
+            <View
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                backgroundColor: '#634DA2',
+                borderRadius: 12,
+                alignItems: 'center',
+              }}>
+              <Text
+                style={{
+                  fontFamily: 'Nunito-Bold',
+                  fontSize: 22,
+                  color: '#fff',
+                  marginBottom: 0,
+                }}>
+                {dateNow.getDate()}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Nunito-Bold',
+                  fontSize: 10,
+                  color: '#ABB1BB',
+                  lineHeight: 12,
+                }}>
+                {dayString()}
+              </Text>
+            </View>
+            <View style={{marginLeft: 32}}>
+              <Text style={{fontFamily: 'Nunito-Regular', fontSize: 14}}>
+                8 Hours Per Day
+              </Text>
+            </View>
+          </View>
+
           <TouchableOpacity
             onPress={() => {
-              deleteAllTodo();
+              // deleteAllTodo();
+              slideUp();
             }}
             style={{
               alignSelf: 'flex-end',
@@ -193,25 +230,60 @@ export default function home() {
           </TouchableOpacity>
 
           {testState.length == 0 && <Text>Currently no task here</Text>}
-
-          <View style={{alignItems: 'center', backgroundColor: '#fff'}}>
-            {testState.map((e) => (
-              <TodoItem
-                task={e.task}
-                done={e.done}
-                onPress={() => deleteTodo(e.id)}
-                doneTodo={() => doneTodo(e.id, e.done)}
-                detail={() => {
-                  setShowModal(true);
-                  setModalData(e);
-                  // console.log(e);
-                }}
-                key={e.id}
-              />
-            ))}
-          </View>
+          <ScrollView>
+            <View style={{alignItems: 'center', backgroundColor: '#fff'}}>
+              {testState.map((e) => (
+                <TodoItem
+                  task={e.task}
+                  done={e.done}
+                  onPress={() => deleteTodo(e.id)}
+                  doneTodo={() => doneTodo(e.id, e.done)}
+                  detail={() => {
+                    setShowModal(true);
+                    setModalData(e);
+                  }}
+                  key={e.id}
+                  due={e.due}
+                />
+              ))}
+            </View>
+          </ScrollView>
         </View>
+
+        <TouchableOpacity onPress={() => navigation.navigate('test_screen')}>
+          <Text>Go to Test</Text>
+        </TouchableOpacity>
       </ScrollView>
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          zIndex: 4,
+          marginTop: hp('88%'),
+          alignSelf: 'flex-end',
+          paddingHorizontal: 16,
+        }}>
+        <Icon name="add-circle" size={64} color="#757EC9" />
+      </TouchableOpacity>
+      <Animated.View
+        style={{
+          elevation: 10,
+          borderTopLeftRadius: 50,
+          borderTopRightRadius: 50,
+          backgroundColor: '#fff',
+          position: 'absolute',
+          transform: [{translateY: topY}],
+        }}>
+        <AddTodo
+          input={input}
+          setInput={setInput}
+          desc={desc}
+          setDesc={setDesc}
+          date={date}
+          setDate={setDate}
+          todoMaster={todoMaster}
+          buatNotif={buatNotif}
+        />
+      </Animated.View>
 
       {/* Modal Component is here cs import export will make this app slower*/}
       <Modal transparent={true} visible={showModal}>

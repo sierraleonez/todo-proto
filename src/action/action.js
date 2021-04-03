@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 export let todos;
 export async function saveTodo(todo) {
   try {
@@ -24,3 +25,5 @@ export async function clearID() {
   }
   console.log('done');
 }
+
+export function getRandomQuote() {}
